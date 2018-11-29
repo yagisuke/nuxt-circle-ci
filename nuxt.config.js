@@ -1,4 +1,4 @@
-var baseRoute = env => (env === 'GH_PAGES' ? '/nuxt-circle-ci-demo/' : '/')
+var baseRoute = env => (env === 'GH_PAGES' ? '/nuxt-circle-ci/' : '/')
 
 module.exports = {
   /*
