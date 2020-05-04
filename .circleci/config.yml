@@ -1,13 +1,72 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-# Use a package of configuration called an orb.
-orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.4.1
-# Orchestrate or schedule a set of jobs
+
+executors:
+  node_executor:
+    docker:
+      - image: circleci/node:12
+
+commands:
+  restore_npm_cache:
+    steps:
+      - restore_cache:
+          name: Restore npm dependencies
+          key: npm-{{ checksum "package-lock.json" }}-{{ .Environment.CACHE_VERSION_NPM }}
+  save_npm_cache:
+    steps:
+      - save_cache:
+          name: Cache npm dependencies
+          key: npm-{{ checksum "package-lock.json" }}-{{ .Environment.CACHE_VERSION_NPM }}
+          paths:
+            - node_modules
+
+jobs:
+  setup_job:
+    executor:
+      name: node_executor
+    steps:
+      - checkout
+      - restore_npm_cache
+      - run: npm install
+      - save_npm_cache
+  lint_job:
+    executor:
+      name: node_executor
+    steps:
+      - checkout
+      - restore_npm_cache
+      - run: npm run lint
+  test_job:
+    executor:
+      name: node_executor
+    steps:
+      - checkout
+      - restore_npm_cache
+      - run: npm run test
+  deploy_job:
+    executor:
+      name: node_executor
+    steps:
+      - checkout
+      - restore_npm_cache
+      - run: git config user.name $GITHUB_NAME
+      - run: git config user.email $GITHUB_EMAIL
+      - run: npm run generate:gh-pages
+      - run: npm run deploy:gh-pages
+
 workflows:
-  # Name the workflow "welcome"
-  welcome:
-    # Run the welcome/run job in its own container
+  build-deploy:
     jobs:
-      - welcome/run
+      - setup_job
+      - lint_job:
+          requires:
+            - setup_job
+      - test_job:
+          requires:
+            - setup_job
+      - deploy_job:
+          requires:
+            - lint_job
+            - test_job
+          filters:
+            branches:
+              only: master
