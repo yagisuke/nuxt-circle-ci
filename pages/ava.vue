@@ -6,7 +6,7 @@
 export default {
   data() {
     return { name: 'world' }
-  }
+  },
 }
 </script>
 

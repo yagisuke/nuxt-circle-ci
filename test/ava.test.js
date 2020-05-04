@@ -24,14 +24,14 @@ test.before('Init Nuxt.js', async () => {
 })
 
 // 生成された HTML のみをテストする例
-test('Route / exits and render HTML', async t => {
+test('Route / exits and render HTML', async (t) => {
   let context = {}
   const { html } = await nuxt.renderRoute('/ava', context)
   t.true(html.includes('<h1 class="red">Hello world!</h1>'))
 })
 
 // DOM チェックを経由してテストする例
-test('Route / exits and render HTML with CSS applied', async t => {
+test('Route / exits and render HTML with CSS applied', async (t) => {
   const window = await nuxt.renderAndGetWindow('http://localhost:4000/ava')
   const element = window.document.querySelector('.red')
   t.not(element, null)

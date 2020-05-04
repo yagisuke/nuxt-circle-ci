@@ -2,8 +2,12 @@
   <section class="container">
     <div>
       <app-logo />
-      <h1 class="title">nuxt-circle-ci</h1>
-      <h2 class="subtitle">Nuxt.js project</h2>
+      <h1 class="title">
+        nuxt-circle-ci
+      </h1>
+      <h2 class="subtitle">
+        Nuxt.js project
+      </h2>
       <div class="links">
         <a
           href="https://qiita.com/yagi_suke/private/03a2411fdc3137ce657a"
@@ -29,8 +33,8 @@ import AppLogo from '~/components/AppLogo.vue'
 
 export default {
   components: {
-    AppLogo
-  }
+    AppLogo,
+  },
 }
 </script>
 
