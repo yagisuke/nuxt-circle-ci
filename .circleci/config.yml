@@ -1,41 +1,72 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+
+executors:
+  node_executor:
     docker:
-      - image: circleci/node:8
+      - image: circleci/node:12
+
+commands:
+  restore_npm_cache:
     steps:
-      - checkout
       - restore_cache:
-          keys:
-            - npm-{{ checksum "package.json" }}
-      - run: npm install
+          name: Restore npm dependencies
+          key: npm-{{ checksum "package-lock.json" }}-{{ .Environment.CACHE_VERSION_NPM }}
+  save_npm_cache:
+    steps:
       - save_cache:
+          name: Cache npm dependencies
+          key: npm-{{ checksum "package-lock.json" }}-{{ .Environment.CACHE_VERSION_NPM }}
           paths:
             - node_modules
-          key: npm-{{ checksum "package.json" }}
-      - run: npm run lint
-      - run: npm run test
-  deploy:
-    docker:
-      - image: circleci/node:8
+
+jobs:
+  setup_job:
+    executor:
+      name: node_executor
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - npm-{{ checksum "package.json" }}
+      - restore_npm_cache
       - run: npm install
+      - save_npm_cache
+  lint_job:
+    executor:
+      name: node_executor
+    steps:
+      - checkout
+      - restore_npm_cache
+      - run: npm run lint
+  test_job:
+    executor:
+      name: node_executor
+    steps:
+      - checkout
+      - restore_npm_cache
+      - run: npm run test
+  deploy_job:
+    executor:
+      name: node_executor
+    steps:
+      - checkout
+      - restore_npm_cache
       - run: git config user.name $GITHUB_NAME
       - run: git config user.email $GITHUB_EMAIL
       - run: npm run generate:gh-pages
       - run: npm run deploy:gh-pages
+
 workflows:
-  version: 2
   build-deploy:
     jobs:
-      - build
-      - deploy:
+      - setup_job
+      - lint_job:
           requires:
-            - build
+            - setup_job
+      - test_job:
+          requires:
+            - setup_job
+      - deploy_job:
+          requires:
+            - lint_job
+            - test_job
           filters:
             branches:
               only: master
