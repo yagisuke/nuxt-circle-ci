@@ -56,7 +56,10 @@ jobs:
 workflows:
   build-deploy:
     jobs:
-      - setup_job
+      - setup_job:
+          filters:
+            branches:
+              ignore: gh-pages
       - lint_job:
           requires:
             - setup_job
