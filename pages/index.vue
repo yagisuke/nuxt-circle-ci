@@ -6,7 +6,7 @@
         nuxt-circle-ci
       </h1>
       <h2 class="subtitle">
-        Nuxt.js project
+        Nuxt.js(v2.12.2) project
       </h2>
       <div class="links">
         <a
